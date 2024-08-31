@@ -27,7 +27,9 @@ const GameInit = () => {
   const connectSocket = (): Promise<Socket> => {
     return new Promise((resolve) => {
       if (!state.socket) {
-        const newSocket = io(`${serverUrl}`);
+        const newSocket = io(`${serverUrl}`, {
+          transports: ['websocket', 'polling'],
+        });
         dispatch({ type: 'SET_SOCKET', payload: newSocket });
 
         newSocket.on('connect', () => {
