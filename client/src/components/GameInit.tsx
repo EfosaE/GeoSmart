@@ -17,10 +17,17 @@ const GameInit = () => {
     setIsDisabled(idValue.trim() === '' || nameValue.trim() === '');
   };
 
+  let serverUrl: string;
+  if (import.meta.env.VITE_ENVIRONMENT === 'development') {
+    serverUrl = import.meta.env.VITE_DEV_SERVER_URL;
+  } else {
+    serverUrl = import.meta.env.VITE_PROD_SERVER_URL;
+  }
+  console.log(serverUrl);
   const connectSocket = (): Promise<Socket> => {
     return new Promise((resolve) => {
       if (!state.socket) {
-        const newSocket = io('http://localhost:3000');
+        const newSocket = io(`${serverUrl}`);
         dispatch({ type: 'SET_SOCKET', payload: newSocket });
 
         newSocket.on('connect', () => {
