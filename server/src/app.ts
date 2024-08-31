@@ -5,6 +5,13 @@ import http from 'http';
 
 // Create an Express application
 const app = express();
+// Configured CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://geosmart-app.netlify.app/'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true // If you need to send cookies with the requests
+}));
+
 
 // Set the port number for the server
 const port = 3000;
@@ -114,3 +121,9 @@ app.get('/', (req, res) => {
 server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+function cors(arg0: {
+  origin: string[]; methods: string; credentials: boolean; // If you need to send cookies with the requests
+}): any {
+  throw new Error('Function not implemented.');
+}
+
