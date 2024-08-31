@@ -2,6 +2,7 @@
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 import http from 'http';
+import cors from 'cors'
 
 // Create an Express application
 const app = express();
@@ -121,9 +122,5 @@ app.get('/', (req, res) => {
 server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-function cors(arg0: {
-  origin: string[]; methods: string; credentials: boolean; // If you need to send cookies with the requests
-}): any {
-  throw new Error('Function not implemented.');
-}
+
 
