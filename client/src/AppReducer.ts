@@ -1,7 +1,7 @@
 import { ActionType, GameState } from './types';
 import { INITIAL_STATE } from './utils/helpers';
 
-export const AppReducer = (state: GameState, action: ActionType):GameState => {
+export const AppReducer = (state: GameState, action: ActionType): GameState => {
   switch (action.type) {
     case 'SET_SCORE':
       return {
@@ -75,6 +75,22 @@ export const AppReducer = (state: GameState, action: ActionType):GameState => {
         gameInfo: {
           ...state.gameInfo,
           noOfPlayers: action.payload,
+        },
+      };
+    case 'PROCEED_TO_GAME':
+      return {
+        ...state,
+        gameInfo: {
+          ...state.gameInfo,
+          atGame: action.payload,
+        },
+      };
+    case 'SET_GAME_MODE':
+      return {
+        ...state,
+        gameMode: {
+          ...state.gameMode,
+          mode: action.payload,
         },
       };
     case 'SET_ROOM_ID':

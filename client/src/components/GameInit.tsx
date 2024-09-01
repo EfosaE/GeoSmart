@@ -3,9 +3,12 @@ import { GlobalContext } from '../GlobalContext';
 import { io, Socket } from 'socket.io-client';
 import { getRandomString } from '../utils/helpers';
 import Lobby from '../Lobby';
+import { toast } from 'react-toastify';
 
 const GameInit = () => {
   const { state, dispatch } = useContext(GlobalContext);
+  const [createdRoom, setCreatedRoom] = useState<string>('');
+  const [isCreateLoading, setIsCreateLoading] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
   const idRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -13,7 +16,6 @@ const GameInit = () => {
   const handleInputChange = () => {
     const idValue = idRef.current?.value || '';
     const nameValue = nameRef.current?.value || '';
-
     setIsDisabled(idValue.trim() === '' || nameValue.trim() === '');
   };
 
@@ -47,35 +49,47 @@ const GameInit = () => {
   };
 
   async function handleGameStart() {
-    dispatch({ type: 'SET_LOADING', payload: true });
+    setIsCreateLoading(true);
     const roomID = getRandomString();
+    setCreatedRoom(roomID);
+
     dispatch({
       type: 'SET_HOST',
       payload: true,
     });
-    dispatch({
-      type: 'SET_ROOM_ID',
-      payload: roomID,
-    });
+
     console.log(state.gameInfo.noOfPlayers);
     const socket = await connectSocket();
 
     if (socket) {
+      dispatch({
+        type: 'SET_ROOM_ID',
+        payload: roomID,
+      });
       console.log('from handleGameStart', socket);
-      socket?.emit('create-game', roomID);
+      socket?.emit('create-game', roomID, state.gameInfo.noOfPlayers);
       socket?.on('gameCreated', (obj) => {
+        toast.success('room created');
+        // dispatch({type:'SET_NO_PLAYERS', payload:obj.room.noOfPlayers})
         console.log(obj);
       });
     }
 
-    dispatch({ type: 'SET_LOADING', payload: false });
+    setIsCreateLoading(false);
   }
 
   async function handleGameJoin() {
     dispatch({ type: 'SET_ERROR', payload: null });
     dispatch({ type: 'SET_LOADING', payload: true });
-
+    console.log(state.gameInfo.noOfPlayers);
     const gameID = idRef.current?.value.trim();
+
+    // this is to ensure i know who initiated the room on the client
+    if (gameID !== createdRoom && createdRoom !== '') {
+      toast.error('You cannot create and abandon a room');
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return;
+    }
 
     const playerName = nameRef.current?.value.trim();
     const socket = await connectSocket();
@@ -99,14 +113,11 @@ const GameInit = () => {
           payload: playerName,
         });
         socket.emit('sendPlayerToLobby', playerName);
+        dispatch({ type: 'SET_GAME_MODE', payload: 'multi' });
         dispatch({ type: 'PROCEED_TO_LOBBY', payload: true });
       });
 
       dispatch({ type: 'SET_LOADING', payload: false });
-
-      // socket.on('startGame', (obj) => {
-      //   console.log(obj);
-      // });
     }
   }
   return (
@@ -123,6 +134,7 @@ const GameInit = () => {
               <button
                 className='rounded-md py-2 px-3 bg-indigo-600 text-white my-4'
                 onClick={() => {
+                  dispatch({ type: 'SET_GAME_MODE', payload: 'single' });
                   dispatch({ type: 'SET_GAME_START', payload: true });
                 }}>
                 Start Game
@@ -150,8 +162,8 @@ const GameInit = () => {
                 <button
                   className='rounded-md py-2 px-3 bg-indigo-600 text-white cursor-pointer disabled:opacity-50'
                   onClick={handleGameStart}
-                  disabled={state.isLoading || state.gameInfo.noOfPlayers < 2}>
-                  {state.isLoading ? 'Creating' : 'Create Game'}
+                  disabled={isCreateLoading || state.gameInfo.noOfPlayers < 2}>
+                  {isCreateLoading ? 'Creating' : 'Create Game'}
                 </button>
                 <p>
                   Room ID:{' '}

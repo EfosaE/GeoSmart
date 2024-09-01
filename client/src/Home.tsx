@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
-// import {  SocketContext } from './SocketContext';
-import GameInterface from './components/GameInterface';
-import axios from 'axios';
-
-import { getRandomCountry } from './utils/helpers';
-import ScoreBoard from './components/ScoreBoard';
+import {
+  MultiPlayerScoreBoard,
+  SinglePlayerScoreBoard,
+} from './components/ScoreBoard';
 import GameHeader from './components/GameHeader';
+import SinglePlayerGameInterface from './components/SinglePlayerGameInterface';
+import { useContext } from 'react';
+import { GlobalContext } from './GlobalContext';
+import MultiPlayerGameInterface from './components/MultiPlayerGameInterface';
 
 // Define the type of a country object based on the API response
 export interface Country {
@@ -23,30 +24,21 @@ export interface Country {
 }
 
 const Home = () => {
-  const [countries, setCountries] = useState<Country[] | null>(null);
-  const [randomCountry, setRandomCountry] = useState<Country | null>(null);
-  // const { socket } = useContext(SocketContext);
-
-  async function fetchCountriesData() {
-    const response = await axios.get('https://restcountries.com/v3.1/all');
-    console.log(response.data);
-    setCountries(response.data);
-  }
-
-  useEffect(() => {
-    fetchCountriesData();
-  }, []);
-
-  useEffect(() => {
-    if (countries) {
-      setRandomCountry(getRandomCountry(countries));
-    }
-  }, [countries]);
+  const { state } = useContext(GlobalContext);
   return (
     <>
       <GameHeader />
-      <GameInterface country={randomCountry} countries={countries} />
-      <ScoreBoard />
+      {state.gameMode.mode === 'single' && <SinglePlayerGameInterface />}
+
+      {state.gameMode.mode === 'multi'&& state.gameInfo.isGameStarted && (
+        <MultiPlayerGameInterface />
+      )}
+
+      {state.gameMode.mode === 'single' ? (
+        <SinglePlayerScoreBoard />
+      ) : (
+        <MultiPlayerScoreBoard />
+      )}
     </>
   );
 };

@@ -42,14 +42,16 @@ export const INITIAL_STATE: GameState = {
     isGameOver: false,
     currentQuestion: 1,
     atLobby: false,
+    atGame: true,
     noOfPlayers: 1,
-    players:[]
+    players: [],
   },
+
   isHost: false,
   playerName: '',
   gameMode: {
-    mode: '',
-    gameType: '',
+    mode: 'single', // single, multi
+    gameType: '', // flags, capital
   },
   isLoading: false,
   socket: null,

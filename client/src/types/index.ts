@@ -1,7 +1,12 @@
 import { Socket } from 'socket.io-client';
+import { PlayerScore } from '../Lobby';
 
 interface SetScoreAction {
   type: 'SET_SCORE';
+}
+interface SetGameModeAction {
+  type: 'SET_GAME_MODE';
+  payload: string;
 }
 interface SetGameStartAction {
   type: 'SET_GAME_START';
@@ -30,7 +35,7 @@ interface IncrementQuestionAction {
 }
 interface SetRoomIdAction {
   type: 'SET_ROOM_ID';
-  payload: string
+  payload: string;
 }
 interface IncrementRoundAction {
   type: 'INCREMENT_ROUND';
@@ -50,20 +55,27 @@ interface SetLobbyAction {
   type: 'PROCEED_TO_LOBBY';
   payload: boolean;
 }
+interface SetGameAction {
+  type: 'PROCEED_TO_GAME';
+  payload: boolean;
+}
 interface SetSocketAction {
   type: 'SET_SOCKET';
   payload: Socket | null;
 }
 interface SetPlayersAction {
   type: 'SET_PLAYERS';
-  payload: string[];
+  payload: PlayerScore[];
 }
+// this is to set the number of players not set to no players, i have just gine too far to start changing it everywhere
 interface SetNoPlayersAction {
   type: 'SET_NO_PLAYERS';
   payload: number;
 }
+
 export type ActionType =
-  | SetScoreAction
+  | SetScoreAction|SetGameAction
+  | SetGameModeAction
   | SetPlayersAction
   | SetNoPlayersAction
   | SetLoadingAction
@@ -93,8 +105,9 @@ export interface GameState {
     currentRound: number;
     isGameStarted: boolean;
     atLobby: boolean;
+    atGame: boolean;
     noOfPlayers: number;
-    players: string[]
+    players: PlayerScore[];
   };
   isHost: boolean;
   playerName: string;
