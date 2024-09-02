@@ -4,6 +4,10 @@ import { PlayerScore } from '../Lobby';
 interface SetScoreAction {
   type: 'SET_SCORE';
 }
+interface SetMultiScoreAction {
+  type: 'SET_MULTI_SCORE';
+  payload: number;
+}
 interface SetGameModeAction {
   type: 'SET_GAME_MODE';
   payload: string;
@@ -74,8 +78,10 @@ interface SetNoPlayersAction {
 }
 
 export type ActionType =
-  | SetScoreAction|SetGameAction
+  | SetScoreAction
+  | SetGameAction
   | SetGameModeAction
+  | SetMultiScoreAction
   | SetPlayersAction
   | SetNoPlayersAction
   | SetLoadingAction

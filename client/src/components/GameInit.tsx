@@ -112,7 +112,7 @@ const GameInit = () => {
           type: 'SET_PLAYER_NAME',
           payload: playerName,
         });
-        socket.emit('sendPlayerToLobby', playerName);
+        socket.emit('sendPlayerToLobby', playerName, gameID);
         dispatch({ type: 'SET_GAME_MODE', payload: 'multi' });
         dispatch({ type: 'PROCEED_TO_LOBBY', payload: true });
       });

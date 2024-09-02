@@ -2,10 +2,20 @@ import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '../GlobalContext';
 import { Country } from '../Home';
 import GameEnd from './GameEnd';
+import { toast } from 'react-toastify';
+import {  PlayerScore } from '../Lobby';
 
 type Data = {
   country: Country;
   options: Country[];
+};
+
+const toastOptions = {
+  autoClose: 1000, // Closes after 1 second (1000 milliseconds)
+  hideProgressBar: true, // Optionally hide the progress bar
+  pauseOnHover: false, // Optionally prevent pausing on hover
+  closeOnClick: true, // Close the toast when clicked
+  draggable: true, // Allow the toast to be draggable
 };
 const MultiPlayerGameInterface = () => {
   const [countryQuestion, setCountryQuestion] = useState<Country | null>(null);
@@ -24,15 +34,45 @@ const MultiPlayerGameInterface = () => {
   }, [dispatch, state.socket]);
 
   useEffect(() => {
-    state.socket?.on('next-question', () => {});
-  }, [state.socket, dispatch]);
+    state.socket?.on('answerCorrect', () => {
+      console.log('answer correct');
+      toast.success('correct', toastOptions);
+    });
+    state.socket?.on('scoreUpdated', (data) => {
+      console.log('score updated', data);
+      // Transformed data to only include name and score
+      const filteredPlayers: PlayerScore[] = data.players.map(
+        ({ name, score }: PlayerScore) => ({
+          name,
+          score,
+        })
+      );
+      dispatch({ type: 'SET_PLAYERS', payload: filteredPlayers });
+    });
+    state.socket?.on('answerIncorrect', () => {
+      console.log('answer incorrect');
+      toast.error('incorrect', toastOptions);
+    });
+    console.log(state.gameInfo.score);
+    state.socket?.on('next-question', (data: Data) => {
+      console.log('new question:', data);
+    });
+  }, [state.socket, dispatch, state.playerName, state.gameInfo.score]);
 
-  function handleClick(name: string) {
-    state.socket?.emit('submit-answer', name);
+  function handleSubmitAnswer(answer: string, playerName: string) {
+    state.socket?.emit(
+      'submit-answer',
+      {
+        answer,
+        playerName,
+        timestamp: Date.now(),
+      },
+      state.gameInfo.roomID
+    );
   }
 
   if (state.isLoading) {
-    return <p>Loading Game Data...</p>;
+    return <p className='container'>Loading Game Data...</p>;
   }
 
   return (
@@ -54,7 +94,9 @@ const MultiPlayerGameInterface = () => {
                 <button
                   key={index}
                   className='w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF]'
-                  onClick={() => handleClick(country.name.common)}>
+                  onClick={() =>
+                    handleSubmitAnswer(country.name.common, state.playerName)
+                  }>
                   {country.name.common}
                 </button>
               ))}

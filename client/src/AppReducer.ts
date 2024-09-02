@@ -11,6 +11,14 @@ export const AppReducer = (state: GameState, action: ActionType): GameState => {
           score: state.gameInfo.score + 1,
         },
       };
+    case 'SET_MULTI_SCORE':
+      return {
+        ...state,
+        gameInfo: {
+          ...state.gameInfo,
+          players: [...state.gameInfo.players, ]
+        },
+      };
     case 'SET_GAME_START':
       return {
         ...state,
@@ -32,6 +40,7 @@ export const AppReducer = (state: GameState, action: ActionType): GameState => {
         ...state,
         isHost: action.payload,
       };
+
     case 'SET_PLAYER_NAME':
       return {
         ...state,

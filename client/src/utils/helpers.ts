@@ -33,6 +33,7 @@ export function getRandomCountry(countries: Country[]) {
 
 export const INITIAL_STATE: GameState = {
   gameInfo: {
+    // this score is to handle the single player
     score: 0,
     totalQuestions: 5,
     roomID: '',
@@ -44,6 +45,7 @@ export const INITIAL_STATE: GameState = {
     atLobby: false,
     atGame: true,
     noOfPlayers: 1,
+    // this one handles multi-player if you check the type
     players: [],
   },
 

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from './GlobalContext';
 import { toast } from 'react-toastify';
-type Player = {
+export type Player = {
   name: string;
   isReady: boolean;
   score: number;
@@ -45,61 +45,13 @@ const Lobby = () => {
     };
   }, [state.socket, dispatch]); // Include only necessary dependencies yunno vscode
 
-  // Keeping this here to show that i used an unnecessary complexity to get latest room info
-  // useEffect(() => {
-  //   function pollForPlayerListUpdate() {
-  //     // Start polling
-  //     const intervalId = setInterval(() => {
-  //       state.socket?.emit('getCurrentList');
-  //     }, 1000); // Poll every second
 
-  //     const handleCurrentPlayers = (data: { players: Player[] }) => {
-  //       console.log(data);
-  //       const playerData = data.players.map((player: Player) => ({
-  //         name: player.name,
-  //         score: player.score,
-  //       }));
-
-  //       dispatch({ type: 'SET_PLAYERS', payload: playerData });
-
-  //       // Stop polling and cleanup
-  //       clearInterval(intervalId);
-  //       console.log('Polling stopped');
-  //       setIsPollDone(true);
-  //     };
-
-  //     // Add event listener
-  //     state.socket?.on('currentPlayers', handleCurrentPlayers);
-
-  //     // Return cleanup function
-  //     return () => {
-  //       clearInterval(intervalId);
-  //       state.socket?.off('currentPlayers', handleCurrentPlayers); // Remove event listener
-  //     };
-  //   }
-
-  //   // Only start polling if not host
-  //   if (!state.isHost) {
-  //     const cleanup = pollForPlayerListUpdate();
-
-  //     // Cleanup function to stop polling and remove listeners
-  //     return cleanup;
-  //   }
-
-  //   // No cleanup needed if isHost is true
-  //   return undefined;
-  // }, [dispatch, state.isHost, state.socket]);
 
   function emitPlayerReady() {
     state.socket?.emit('player-ready', state.gameInfo.roomID, state.playerName);
     console.log('checking recipient', state.gameInfo.roomID, state.playerName);
     dispatch({ type: 'SET_LOADING', payload: true });
 
-    // state.socket?.on('startGame', (data) => {
-    //   console.log('Game Started');
-    //   setIsLoading(false);
-    //   if (data.state) dispatch({ type: 'SET_GAME_START', payload: true });
-    // });
   }
   
 
