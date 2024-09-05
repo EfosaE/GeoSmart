@@ -5,14 +5,9 @@ import { toast } from 'react-toastify';
 import { Howl } from 'howler';
 import MultiGameEnd from './MultiGameEnd';
 import { Country, Data, PlayerScore } from '../types/appTypes';
+import { toastOptions } from '../utils/helpers';
 
-const toastOptions = {
-  autoClose: 500, // Closes after .5 second (500 milliseconds)
-  hideProgressBar: true, // Optionally hide the progress bar
-  pauseOnHover: false, // Optionally prevent pausing on hover
-  closeOnClick: true, // Close the toast when clicked
-  draggable: true, // Allow the toast to be draggable
-};
+
 const answeredEffect = new Howl({
   src: [answeredMusic], // Replace with your sound file
 });
@@ -143,7 +138,7 @@ const MultiPlayerGameInterface = () => {
   if (state.gameInfo.isGameOver && state.gameMode.mode === 'multi') {
     return (
       <div className='flex flex-col items-center justify-center'>
-        <p className='text-green-600'>Opponent Disconnected, YOU WIN!!! </p>
+        <p className='text-indigo-600'>Opponent Disconnected.</p>
         <button
           className='rounded-md py-2 px-3 bg-indigo-600 text-white my-2'
           onClick={() => {

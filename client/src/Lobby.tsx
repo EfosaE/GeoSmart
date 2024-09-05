@@ -109,7 +109,7 @@ const Lobby = () => {
     <div className='container '>
       {state.gameInfo.isGameOver ? (
         <div className='flex flex-col items-center justify-center'>
-          <p className='text-green-600'>Opponent Disconnected, YOU WIN!!! </p>
+          <p className='text-indigo-600'>Opponent Disconnected</p>
           <button
             className='rounded-md py-2 px-3 bg-indigo-600 text-white my-2'
             onClick={() => {

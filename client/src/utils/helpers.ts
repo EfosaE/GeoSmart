@@ -2,6 +2,14 @@
 import { GameState } from '../types';
 import { Country } from '../types/appTypes';
 
+export const toastOptions = {
+  autoClose: 500, // Closes after .5 second (500 milliseconds)
+  hideProgressBar: true, // Optionally hide the progress bar
+  pauseOnHover: false, // Optionally prevent pausing on hover
+  closeOnClick: true, // Close the toast when clicked
+  draggable: true, // Allow the toast to be draggable
+};
+
 export function getRandomOptions(
   countries: Country[],
   correctCountry: Country,
