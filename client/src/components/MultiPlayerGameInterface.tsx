@@ -1,14 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '../GlobalContext';
-import { Country } from '../Home';
+import answeredMusic from '../assets/answered.mp3';
 import { toast } from 'react-toastify';
-import { PlayerScore } from '../Lobby';
+import { Howl } from 'howler';
 import MultiGameEnd from './MultiGameEnd';
-
-type Data = {
-  country: Country;
-  options: Country[];
-};
+import { Country, Data, PlayerScore } from '../types/appTypes';
 
 const toastOptions = {
   autoClose: 500, // Closes after .5 second (500 milliseconds)
@@ -17,6 +13,9 @@ const toastOptions = {
   closeOnClick: true, // Close the toast when clicked
   draggable: true, // Allow the toast to be draggable
 };
+const answeredEffect = new Howl({
+  src: [answeredMusic], // Replace with your sound file
+});
 
 const MultiPlayerGameInterface = () => {
   const [countryQuestion, setCountryQuestion] = useState<Country | null>(null);
@@ -46,8 +45,6 @@ const MultiPlayerGameInterface = () => {
       socket?.off('timerOut'); // Remove the 'timeOut' event listener
       socket?.off('timerUpdated');
     };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.socket, state.gameInfo.currentQuestion]);
 
   // #1
@@ -121,7 +118,8 @@ const MultiPlayerGameInterface = () => {
   }, [state.socket, state.gameInfo.score]);
 
   function handleSubmitAnswer(answer: string, playerName: string) {
-    console.log('playerAnswerState', answer);
+    answeredEffect.play();
+
     state.socket?.emit(
       'submit-answer',
       {
@@ -131,7 +129,6 @@ const MultiPlayerGameInterface = () => {
       },
       state.gameInfo.roomID
     );
-
     setIsDisabled(true);
   }
 
@@ -165,7 +162,12 @@ const MultiPlayerGameInterface = () => {
           <MultiGameEnd />
         ) : (
           <div className='container flex flex-col items-center justify-center'>
-            <p>Time remaining: {remainingTime} seconds</p>
+            <p
+              className={`${
+                remainingTime! < 5 ? 'text-red-500' : 'text-green-500'
+              }`}>
+              {remainingTime} seconds
+            </p>
             <div>
               <img
                 src={countryQuestion?.flags.svg}

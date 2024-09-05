@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io-client';
-import { PlayerScore } from '../Lobby';
+import { PlayerScore } from './appTypes';
+
 
 interface SetScoreAction {
   type: 'SET_SCORE';

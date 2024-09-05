@@ -1,21 +1,16 @@
 import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from './GlobalContext';
 import { toast } from 'react-toastify';
-export type Player = {
-  name: string;
-  isReady: boolean;
-  score: number;
-};
-export interface PlayerScore {
-  name: string;
-  score: number;
-}
-interface Room {
-  answered: boolean;
-  correctAnswer: string;
-  numberOfPlayers: number;
-  players: Player[];
-}
+import { Howl } from 'howler';
+import lobbyMusic from '../src/assets/lobbyMusic.mp3';
+import { Room, Player, PlayerScore } from './types/appTypes';
+
+const waitingMusic = new Howl({
+  src: [lobbyMusic], // Replace with your sound file
+  loop: true, // Set loop to true to play continuously
+});
+
+
 const Lobby = () => {
   const { state, dispatch } = useContext(GlobalContext);
 
@@ -23,7 +18,11 @@ const Lobby = () => {
   // #1
   useEffect(() => {
     state.socket?.emit('lobbyMounted');
-    console.log('RoomID from lobby',state.gameInfo.roomID)
+    // Play sound after a 2-second delay
+    const soundTimeout = setTimeout(() => {
+      waitingMusic.play(); // Play sound using Howler
+    }, 2000);
+    console.log('RoomID from lobby', state.gameInfo.roomID);
     const handleCurrentRoomInfo = (data: Room) => {
       console.log('Room', data);
       const playerData = data.players.map((player: Player) => ({
@@ -49,9 +48,12 @@ const Lobby = () => {
 
     // Clean up the listener when the component unmounts
     return () => {
+      waitingMusic.stop();
+      clearTimeout(soundTimeout);
       state.socket?.off('all-ready', handleAllReady);
       state.socket?.off('currentRoomInfo', handleCurrentRoomInfo);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.socket, dispatch]); // Include only necessary dependencies yunno vscode
   // #2
   useEffect(() => {
