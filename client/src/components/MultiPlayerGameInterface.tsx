@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '../GlobalContext';
 import { Country } from '../Home';
-import GameEnd from './GameEnd';
 import { toast } from 'react-toastify';
-import {  PlayerScore } from '../Lobby';
+import { PlayerScore } from '../Lobby';
+import MultiGameEnd from './MultiGameEnd';
 
 type Data = {
   country: Country;
@@ -11,55 +11,117 @@ type Data = {
 };
 
 const toastOptions = {
-  autoClose: 1000, // Closes after 1 second (1000 milliseconds)
+  autoClose: 500, // Closes after .5 second (500 milliseconds)
   hideProgressBar: true, // Optionally hide the progress bar
   pauseOnHover: false, // Optionally prevent pausing on hover
   closeOnClick: true, // Close the toast when clicked
   draggable: true, // Allow the toast to be draggable
 };
+
 const MultiPlayerGameInterface = () => {
   const [countryQuestion, setCountryQuestion] = useState<Country | null>(null);
   const [options, setOptions] = useState<Country[] | null>(null);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const [remainingTime, setRemainingTime] = useState<number | undefined>();
+
   const { state, dispatch } = useContext(GlobalContext);
 
+  // UseEffect to control TimeOut and TimerUpdated
   useEffect(() => {
-    state.socket?.emit('gameMounted');
+    console.log(state.gameInfo.currentQuestion);
+    const socket = state.socket;
+    // Listen for the 'timerUpdated' event
+    socket?.on('timerUpdated', (time: number) => {
+      setRemainingTime(time);
+      console.log('Timer from the server', time);
+    });
+    // Listen for the 'timeOut' event from the server
+    socket?.on('timerElapsed', () => {
+      console.log('Timer from the server has ended');
+    });
+
+    // Cleanup function to remove the event listener
+    return () => {
+      socket?.off('timerOut'); // Remove the 'timeOut' event listener
+      socket?.off('timerUpdated');
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.socket, state.gameInfo.currentQuestion]);
+
+  // #1
+  useEffect(() => {
+    const socket = state.socket;
+
+    // Emit 'gameMounted' event
+    socket?.emit('gameMounted');
+
+    // Set loading state to true
     dispatch({ type: 'SET_LOADING', payload: true });
-    state.socket?.on('gameInitialized', (data: Data) => {
-      console.log(data);
+
+    // Event handler for 'gameInitialized'
+    const handleGameInitialized = (data: Data) => {
       setCountryQuestion(data.country);
       setOptions(data.options);
       dispatch({ type: 'SET_LOADING', payload: false });
-    });
-  }, [dispatch, state.socket]);
+    };
 
+    // Register the event listener
+    socket?.on('gameInitialized', handleGameInitialized);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      socket?.off('gameInitialized', handleGameInitialized);
+    };
+  }, [dispatch, state.gameInfo.roomID, state.socket]);
+
+  // #3
   useEffect(() => {
-    state.socket?.on('answerCorrect', () => {
+    const socket = state.socket;
+
+    const handleAnswerCorrect = () => {
       console.log('answer correct');
       toast.success('correct', toastOptions);
-    });
-    state.socket?.on('scoreUpdated', (data) => {
+    };
+
+    const handleScoreUpdated = (data: PlayerScore[]) => {
       console.log('score updated', data);
-      // Transformed data to only include name and score
-      const filteredPlayers: PlayerScore[] = data.players.map(
-        ({ name, score }: PlayerScore) => ({
-          name,
-          score,
-        })
-      );
-      dispatch({ type: 'SET_PLAYERS', payload: filteredPlayers });
-    });
-    state.socket?.on('answerIncorrect', () => {
+
+      dispatch({ type: 'SET_PLAYERS', payload: data });
+    };
+
+    const handleAnswerIncorrect = () => {
       console.log('answer incorrect');
       toast.error('incorrect', toastOptions);
-    });
-    console.log(state.gameInfo.score);
-    state.socket?.on('next-question', (data: Data) => {
+    };
+
+    const handleNextQuestion = (data: Data) => {
       console.log('new question:', data);
-    });
-  }, [state.socket, dispatch, state.playerName, state.gameInfo.score]);
+      setIsDisabled(false);
+      dispatch({ type: 'INCREMENT_QUESTION' });
+      setCountryQuestion(data.country);
+      setOptions(data.options);
+    };
+
+    // Register event listeners
+    socket?.on('answerCorrect', handleAnswerCorrect);
+    socket?.on('scoreUpdated', handleScoreUpdated);
+    socket?.on('answerIncorrect', handleAnswerIncorrect);
+    socket?.on('next-question', handleNextQuestion);
+
+    // Cleanup function to remove event listeners
+    return () => {
+      socket?.off('answerCorrect', handleAnswerCorrect);
+      socket?.off('scoreUpdated', handleScoreUpdated);
+      socket?.off('answerIncorrect', handleAnswerIncorrect);
+      socket?.off('next-question', handleNextQuestion);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.socket, state.gameInfo.score]);
 
   function handleSubmitAnswer(answer: string, playerName: string) {
+    console.log('playerAnswerState', answer);
     state.socket?.emit(
       'submit-answer',
       {
@@ -69,19 +131,41 @@ const MultiPlayerGameInterface = () => {
       },
       state.gameInfo.roomID
     );
+
+    setIsDisabled(true);
   }
 
   if (state.isLoading) {
-    return <p className='container'>Loading Game Data...</p>;
+    return (
+      <p className='container flex items-center justify-center'>
+        Loading Game Data...
+      </p>
+    );
   }
 
+  if (state.gameInfo.isGameOver && state.gameMode.mode === 'multi') {
+    return (
+      <div className='flex flex-col items-center justify-center'>
+        <p className='text-green-600'>Opponent Disconnected, YOU WIN!!! </p>
+        <button
+          className='rounded-md py-2 px-3 bg-indigo-600 text-white my-2'
+          onClick={() => {
+            dispatch({ type: 'RESET_GAME' });
+            dispatch({ type: 'SET_GAME_START', payload: false });
+          }}>
+          End Game Session
+        </button>
+      </div>
+    );
+  }
   return (
     <div className='container'>
       <div>
-        {state.gameInfo.isGameOver ? (
-          <GameEnd />
+        {state.gameInfo.currentQuestion > state.gameInfo.totalQuestions ? (
+          <MultiGameEnd />
         ) : (
           <div className='container flex flex-col items-center justify-center'>
+            <p>Time remaining: {remainingTime} seconds</p>
             <div>
               <img
                 src={countryQuestion?.flags.svg}
@@ -94,9 +178,10 @@ const MultiPlayerGameInterface = () => {
                 <button
                   key={index}
                   className='w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF]'
-                  onClick={() =>
-                    handleSubmitAnswer(country.name.common, state.playerName)
-                  }>
+                  onClick={() => {
+                    handleSubmitAnswer(country.name.common, state.playerName);
+                  }}
+                  disabled={isDisabled}>
                   {country.name.common}
                 </button>
               ))}

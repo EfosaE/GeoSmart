@@ -39,9 +39,6 @@ const GameInit = () => {
           resolve(newSocket);
         });
 
-        newSocket.on('message', (message: string) => {
-          console.log('Message received:', message);
-        });
       } else {
         resolve(state.socket); // If the socket already exists, resolve immediately
       }
@@ -155,7 +152,7 @@ const GameInit = () => {
                   }}>
                   <option value=''>select</option>
                   <option value='2'>2</option>
-                  <option value='3'>3</option>
+                  {/* <option value='3'>3</option> */}
                 </select>
               </label>
               <div className='flex flex-col gap-2'>

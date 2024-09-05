@@ -1,18 +1,45 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Country } from '../Home';
 import { getRandomCountry, getRandomOptions } from '../utils/helpers';
 import { GlobalContext } from '../GlobalContext';
 import GameEnd from './GameEnd';
 import axios from 'axios';
 
-
 const SinglePlayerGameInterface = () => {
   const [questionCountry, setQuestionCountry] = useState<Country | null>(null);
   const { state, dispatch } = useContext(GlobalContext);
   const [countries, setCountries] = useState<Country[] | null>(null);
+  const [remainingTime, setRemainingTime] = useState(10);
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined
+  );
   const [randomCountry, setRandomCountry] = useState<Country | null>(null);
   // const { socket } = useContext(SocketContext);
+  // Function to handle the timer
+  const startTimer = () => {
+    console.log('timer started');
+    setRemainingTime(10); // Reset timer to 10 seconds
 
+    const countdown = (time: number) => {
+      if (time < 0) {
+        console.log('timer ended');
+        // Timer has reached 0, emit time out event
+        // state.socket?.emit('timeOut', state.gameInfo.roomID);
+        return;
+      }
+      setRemainingTime(time);
+      timerRef.current = setTimeout(() => countdown(time - 1), 1000); // Set the next timeout
+    };
+
+    countdown(10); // Start the countdown with 10 seconds
+  };
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current); // Cleanup the timer when the component unmounts
+      }
+    };
+  }, []);
   async function fetchCountriesData() {
     const response = await axios.get('https://restcountries.com/v3.1/all');
     setCountries(response.data);
@@ -37,7 +64,6 @@ const SinglePlayerGameInterface = () => {
       dispatch({ type: 'SET_GAME_OVER', payload: true });
     }
   }, [state.gameInfo.currentQuestion, state.gameInfo.totalQuestions, dispatch]);
-
 
   if (!questionCountry || !countries) {
     return <div className=''>Getting Countries... </div>;
@@ -64,6 +90,7 @@ const SinglePlayerGameInterface = () => {
         <GameEnd />
       ) : (
         <div className='container flex flex-col items-center justify-center'>
+          <p>Time remaining: {remainingTime} seconds</p>
           <div>
             <img
               src={questionCountry?.flags.svg}

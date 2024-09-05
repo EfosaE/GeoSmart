@@ -14,25 +14,44 @@ export interface Country {
   // Add other properties you're interested in
 }
 
-export const getCountries = async () => {
-  try {
-    const response = await axios.get('https://restcountries.com/v3.1/all');
-    const countries = response.data;
+export let countries: Country[] = [];
 
-    return countries;
-  } catch (error) {
-    console.error('Error fetching countries:', error);
-    throw error;
+export const getCountries = async (retries = 3, delay = 1000) => {
+  if (countries.length > 0) {
+    return countries; // Return cached countries if already fetched
+  }
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await axios.get('https://restcountries.com/v3.1/all');
+      countries = response.data;
+      return countries;
+    } catch (error) {
+      if (i < retries - 1) {
+        console.warn(`Retrying (${i + 1}/${retries})...`);
+        await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+      } else {
+        console.error('Error fetching countries:', error);
+        throw error; // Throw error after all retries fail
+      }
+    }
   }
 };
 
-export const getRandomCountry = async (countries: Country[]) => {
+
+// export const getRandomCountry = async (countries: Country[]) => {
+//   const randomIndex = Math.floor(Math.random() * countries.length);
+//   return countries[randomIndex];
+// };
+export const getRandomCountry = () => {
+  if (countries.length === 0) {
+    throw new Error('Countries data not loaded');
+  }
   const randomIndex = Math.floor(Math.random() * countries.length);
   return countries[randomIndex];
 };
 
 export function getRandomOptions(
-  countries: Country[],
   correctCountry: Country,
   numberOfOptions: number
 ): Country[] {

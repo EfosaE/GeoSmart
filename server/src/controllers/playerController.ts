@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
 import { io, Room, rooms } from '../app';
 import { getCountries, getRandomCountry, getRandomOptions } from '../country';
-import { getQuestion } from './questAnsController';
+import { getFirstQuestion, getQuestion } from './questAnsController';
 
 export const playerHandler = (
   socket: Socket,
@@ -14,7 +14,7 @@ export const playerHandler = (
     player.isReady = true;
 
     // Notify all players in the room about the readiness status
-    io.to(roomID).emit('player-readiness-updated', rooms[roomID]);
+    io.to(roomID).emit('player-readiness-updated', rooms[roomID], playerName);
 
     // Check if all players are ready
     const allReady = room.players.every((p) => p.isReady);
@@ -22,21 +22,7 @@ export const playerHandler = (
     if (allReady) {
       io.to(roomID).emit('all-ready');
       socket.on('gameMounted', async () => {
-        const data = await getQuestion();
-        const { country, options } = data;
-        if (country) {
-          io.to(roomID).emit('gameInitialized', {
-            country,
-            options,
-          });
-          // store the correct answer in the room object
-          rooms[roomID].correctAnswer = country.name.common;
-        } else {
-          io.to(roomID).emit('startGame', {
-            state: false,
-            error: 'an error occurred',
-          });
-        }
+        getFirstQuestion(roomID);
       });
     }
   }

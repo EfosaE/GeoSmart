@@ -3,8 +3,6 @@ import { ActionType } from './types';
 import { AppReducer } from './AppReducer';
 import { INITIAL_STATE } from './utils/helpers';
 
-
-
 // Inititalize my dispatch function
 const noop = () => {};
 
@@ -15,16 +13,47 @@ export const GlobalContext = createContext({
 
 const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(AppReducer, INITIAL_STATE);
+
+ 
+
+  useEffect(() => {
+    state.socket?.on('playerLeft', (data) => {
+      console.log(data);
+      dispatch({ type: 'SET_GAME_OVER', payload: true });
+    });
+
+    if (
+      state.gameInfo.isGameOver ||
+      state.gameInfo.currentQuestion > state.gameInfo.totalQuestions
+    ) {
+      console.log('game-over-emitted');
+      state.socket?.emit('gameOver', state.gameInfo.roomID);
+    }
+  }, [
+    state.gameInfo.currentQuestion,
+    state.gameInfo.isGameOver,
+    state.gameInfo.roomID,
+    state.gameInfo.totalQuestions,
+    state.socket,
+  ]);
+
   // Handle disconnect and clean up when component unmounts
   useEffect(() => {
     return () => {
       if (state.socket) {
+        // Send a custom event to notify server before socket disconnects
+        state.socket.emit(
+          'playerDisconnect',
+          state.gameInfo.roomID,
+          state.playerName
+        );
         state.socket.off('message'); // Clean up specific event listeners
         state.socket.disconnect(); // Disconnect socket
         dispatch({ type: 'SET_SOCKET', payload: null }); // Reset socket in state
         console.log('Socket disconnected and cleaned up.');
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.socket, dispatch]);
   return (
     <GlobalContext.Provider value={{ state, dispatch }}>

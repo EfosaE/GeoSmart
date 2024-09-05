@@ -2,9 +2,12 @@ import express from 'express';
 import { Server, Socket } from 'socket.io';
 import http from 'http';
 import cors from 'cors';
-import { createGame, joinGame } from './controllers/gameController';
+import { createRoom, endGame, joinRoom } from './controllers/gameController';
 import { playerHandler } from './controllers/playerController';
-import { getQuestion } from './controllers/questAnsController';
+import {
+  answerHandler,
+  getNextQuestion,
+} from './controllers/questAnsController';
 
 const app = express();
 // Configured CORS
@@ -29,7 +32,7 @@ export const io = new Server(server, {
   },
 });
 
-interface Player {
+export interface Player {
   name: string;
   isReady: boolean;
   score: number;
@@ -37,10 +40,13 @@ interface Player {
 
 export interface Room {
   answers?: { [playerName: string]: string }; // Player Names as keys, answers as values
-  answerTimeout?: NodeJS.Timeout | null;
   correctAnswer: string;
   numberOfPlayers: number;
   players: Player[];
+  gameEnded: boolean;
+  answered: boolean;
+  remainingTime?: number;
+  questionTimer?: NodeJS.Timeout; // Type for the timer
 }
 
 interface Rooms {
@@ -49,33 +55,9 @@ interface Rooms {
 
 export const rooms: Rooms = {};
 
-// so I can really understand what this looks like lol
-// {
-//   "room1": {
-//     answers: {
-//       "Alice": "Canada",
-//       "Bob": "France"
-//     },
-//     answerTimeout: null, // or some timeout value like setTimeout(...),
-//     correctAnswer: "Canada",
-//     numberOfPlayers: 2,
-//     players: [
-//       {
-//         name: "Alice",
-//         isReady: true,
-//         score: 10
-//       },
-//       {
-//         name: "Bob",
-//         isReady: true,
-//         score: 0
-//       }
-//     ]
-//   }
-// };
-
 export interface CustomSocket extends Socket {
   playerName?: string; // You can define a more specific type if needed
+  roomID?: string;
 }
 
 // Handle Socket.IO connections
@@ -83,9 +65,12 @@ io.on('connection', (socket: CustomSocket) => {
   console.log('A user connected:', socket.id);
 
   // Host creates a game room
-  socket.on('create-game', (roomID: string, numberOfPlayers: number) => {
-    createGame(socket, roomID, numberOfPlayers);
-  });
+  socket.on(
+    'create-game',
+    (roomID: string, numberOfPlayers: number, playerName: string) => {
+      createRoom(socket, roomID, numberOfPlayers, playerName);
+    }
+  );
 
   // When user joins the game
   socket.on('join-game', (roomID, playerName) => {
@@ -96,7 +81,7 @@ io.on('connection', (socket: CustomSocket) => {
       return;
     }
     if (room) {
-      joinGame(socket, room, roomID, playerName);
+      joinRoom(socket, room, roomID, playerName);
     }
   });
 
@@ -116,6 +101,7 @@ io.on('connection', (socket: CustomSocket) => {
       playerHandler(socket, room, playerName, roomID);
     }
   });
+
   // remember to emit roomID
   socket.on('submit-answer', async (data, roomID: string) => {
     console.log(data);
@@ -132,52 +118,28 @@ io.on('connection', (socket: CustomSocket) => {
     rooms[roomID].answers[playerName] = answer;
     console.log(rooms[roomID].answers);
     // refactor this into a check answer function
-    if (correctAnswer === answer && player) {
-      // Increment the player's score for the correct answer
-      player.score += 10;
-      console.log(rooms[roomID].players)
-      console.log('answer is correct')
-      socket.emit('answerCorrect');
-      io.to(roomID).emit('scoreUpdated', rooms[roomID]);
-    } else {
-      console.log(rooms[roomID].players);
-      console.log('answer is incorrect');
-      socket.emit('answerIncorrect');
-    }
-
-
-    if (
-      Object.keys(rooms[roomID].answers).length ===
-      rooms[roomID].numberOfPlayers
-    ) {
-      console.log('ANSWERED!!!');
-      const data = await getQuestion();
-      const { country, options } = data;
-      io.to(roomID).emit('next-question', { country, options });
-    }
-
-    // if (!rooms[roomID].answered) {
-    //   rooms[roomID].answered = true;
-
-    //   // Update the score if correct
-    //   if (answer === correctAnswer) {
-    //     // Update the player's score
-
-    //     // Update the player's score
-    //     if (player)
-    //       io.to(roomID).emit('updateScore', {
-    //         playerName,
-    //         score: player.score + 1,
-    //       });
-    //   } else {
-    //     io.to(roomID).emit('updateScore', 'no player got the question');
-    //   }
-    // }
+    const answersLength = Object.keys(rooms[roomID].answers).length;
+    if (player)
+      answerHandler(
+        socket,
+        correctAnswer,
+        answer,
+        player,
+        roomID,
+        answersLength
+      );
   });
 
-  // Optionally handle disconnection
+  socket.on('gameOver', (roomID: string) => {
+    rooms[roomID].remainingTime = undefined;
+    endGame(roomID);
+  });
+
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
+    if (socket.roomID)
+      io.to(socket.roomID).emit('playerLeft', socket.playerName);
+    console.log(`${socket.playerName} disconnected from ${socket.roomID}`);
   });
 });
 
