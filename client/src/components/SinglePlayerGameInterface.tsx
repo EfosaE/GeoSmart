@@ -35,6 +35,7 @@ const SinglePlayerGameInterface = () => {
     if (isTimeOut) {
       getNextQuestion();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTimeOut]);
 
   // Function to handle the timer
@@ -72,7 +73,6 @@ const SinglePlayerGameInterface = () => {
         clearTimeout(timerRef.current); // Cleanup the timer when the component unmounts
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

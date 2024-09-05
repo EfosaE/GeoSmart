@@ -86,13 +86,20 @@ export const joinRoom = (
       };
     }
 
+    if (rooms[roomID].players.some((player) => player.name === playerName)) {
+      socket.emit('joinedGame', {
+        success: false,
+        message: 'That name exists in this room',
+      });
+      return;
+    }
+
     // Add player to the room's player list
     rooms[roomID].players.push({
       name: playerName,
       isReady: false,
       score: 0,
     });
-
     socket.emit('joinedGame', { success: true });
   } else {
     socket.emit('joinedGame', { success: false, message: 'Room is Full' });

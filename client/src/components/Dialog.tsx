@@ -37,8 +37,8 @@ const Dialog = forwardRef<HTMLDivElement, ModalProps>(
                 There is a timer in both modes. For now, the feature to set it
                 yourself may not have been implemented{' '}
                 <span className='italic text-sm'>
-                  (too lazy to add that but I may if people request for
-                  it &#128522;).
+                  (too lazy to add that but I may if people request for it
+                  &#128522;).
                 </span>
                 <span className='text-indigo-500 font-semibold'>
                   ...10 secs
@@ -66,7 +66,11 @@ const Dialog = forwardRef<HTMLDivElement, ModalProps>(
               <p>
                 Notice any bug or have a relevant addition to this project
                 message me on{' '}
-                <a href='http://' className='text-indigo-500'>
+                <a
+                  href='https://x.com/Efosa_E_O?t=GmmrKTJopa9gVUoDbkiyJA&s=09'
+                  className='text-indigo-500'
+                  target='_blank'
+                  rel='noopener noreferrer'>
                   twitter
                 </a>{' '}
                 or{' '}
@@ -75,8 +79,13 @@ const Dialog = forwardRef<HTMLDivElement, ModalProps>(
                   className='text-indigo-500'>
                   mail.
                 </a>
-                        </p>
-                        <p className='font-bold text-blue-500 uppercase'>thank you.</p>
+              </p>
+              <p className='text-indigo-400 text-sm'>
+                Creating or Joining a game may take longer than usual please be
+                patient as I dont have the money to pay for premium backend
+                services yet.
+              </p>
+              <p className='font-bold text-blue-500 uppercase'>thank you.</p>
             </div>
 
             <button

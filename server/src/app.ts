@@ -74,12 +74,18 @@ io.on('connection', (socket: CustomSocket) => {
 
   // When user joins the game
   socket.on('join-game', (roomID, playerName) => {
+
     const room: Set<string> | undefined = io.sockets.adapter.rooms.get(roomID);
     // Check if the room exists and is not empty
     if (!room) {
       socket.emit('joinedGame', { success: false, message: 'Room not found' });
       return;
     }
+    
+    //  if (rooms[roomID].players) {
+    //    socket.emit('joinedGame', { success: false, message: 'Room not found' });
+    //    return;
+    //  }
     if (room) {
       joinRoom(socket, room, roomID, playerName);
     }
