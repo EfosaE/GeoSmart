@@ -1,5 +1,6 @@
-import { Country } from '../Home';
+
 import { GameState } from '../types';
+import { Country } from '../types/appTypes';
 
 export function getRandomOptions(
   countries: Country[],
