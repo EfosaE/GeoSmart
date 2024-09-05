@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getRandomCountry, getRandomOptions } from '../utils/helpers';
 import { GlobalContext } from '../GlobalContext';
 import GameEnd from './GameEnd';
@@ -10,9 +10,9 @@ const SinglePlayerGameInterface = () => {
   const { state, dispatch } = useContext(GlobalContext);
   const [countries, setCountries] = useState<Country[] | null>(null);
   // const [remainingTime, setRemainingTime] = useState(10);
-  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(
-    undefined
-  );
+  // const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(
+  //   undefined
+  // );
   const [randomCountry, setRandomCountry] = useState<Country | null>(null);
   // const { socket } = useContext(SocketContext);
   // Function to handle the timer
@@ -33,13 +33,13 @@ const SinglePlayerGameInterface = () => {
 
   //   countdown(10); // Start the countdown with 10 seconds
   // };
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current); // Cleanup the timer when the component unmounts
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     if (timerRef.current) {
+  //       clearTimeout(timerRef.current); // Cleanup the timer when the component unmounts
+  //     }
+  //   };
+  // }, []);
   async function fetchCountriesData() {
     const response = await axios.get('https://restcountries.com/v3.1/all');
     setCountries(response.data);
