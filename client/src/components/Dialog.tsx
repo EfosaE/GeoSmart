@@ -7,9 +7,13 @@ interface ModalProps {
 const Dialog = forwardRef<HTMLDivElement, ModalProps>(
   ({ closeModal, isOpen }, ref) => {
     return (
-      <div className={`absolute inset-0 z-50 bg-white ${!isOpen && 'hidden'} `} ref={ref}>
+      <div
+        className={`absolute inset-0 z-50 bg-white ${
+          !isOpen && 'hidden'
+        } container `}
+        ref={ref}>
         <div className='flex flex-col items-center justify-center '>
-          <h2 className='text-blue-400 mb-4 text-md '>How to play!</h2>
+          <h2 className='text-blue-400 my-4 text-md  '>How to play!</h2>
           <div className='flex flex-col gap-4 font-light'>
             <p>
               There are two modes in this game:{' '}
