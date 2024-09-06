@@ -149,7 +149,7 @@ const MultiPlayerGameInterface = () => {
           <div className='container flex flex-col items-center justify-center'>
             <p
               className={`${
-                remainingTime! < 5 ? 'text-red-500' : 'text-green-500'
+                remainingTime! < 6 ? 'text-red-500' : 'text-green-500'
               }`}>
               {remainingTime} seconds
             </p>
@@ -164,7 +164,7 @@ const MultiPlayerGameInterface = () => {
               {options?.map((country, index) => (
                 <button
                   key={index}
-                  className='w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF]'
+                  className='w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF] disabled:opacity-50'
                   onClick={() => {
                     handleSubmitAnswer(country.name.common, state.playerName);
                   }}

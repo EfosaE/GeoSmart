@@ -61,7 +61,13 @@ const GameInit = () => {
       });
       socket?.emit('create-game', roomID, state.gameInfo.noOfPlayers);
       socket?.on('gameCreated', (obj) => {
-        toast.success('room created');
+        if (obj.success) {
+          toast.success('Room Created Successfully');
+        } else {
+          toast.error('An error occurred');
+        }
+
+        // for more than 2 players
         // dispatch({type:'SET_NO_PLAYERS', payload:obj.room.noOfPlayers})
       });
     }

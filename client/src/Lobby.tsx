@@ -79,7 +79,7 @@ const Lobby = () => {
 
   // #3
   useEffect(() => {
-    const handlePlayerReadinessUpdated = (data: Room, playerName: string) => {
+    const handlePlayerReadinessUpdated = (playerName: string) => {
       if (state.playerName !== playerName) {
         toast.info(` ${playerName} is ready`);
       }

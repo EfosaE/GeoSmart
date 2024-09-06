@@ -14,16 +14,16 @@ export const GlobalContext = createContext({
 const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(AppReducer, INITIAL_STATE);
 
-  useEffect(() => {
-    state.socket?.on('playerLeft', (data) => {
-      dispatch({ type: 'SET_GAME_OVER', payload: true });
+   useEffect(() => {
+    state.socket?.on('playerLeft', () => {
+            dispatch({ type: 'SET_GAME_OVER', payload: true });
     });
 
     if (
       state.gameInfo.isGameOver ||
       state.gameInfo.currentQuestion > state.gameInfo.totalQuestions
     ) {
-      state.socket?.emit('gameOver', state.gameInfo.roomID);
+            state.socket?.emit('gameOver', state.gameInfo.roomID);
     }
   }, [
     state.gameInfo.currentQuestion,
@@ -46,7 +46,7 @@ const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
         state.socket.off('message'); // Clean up specific event listeners
         state.socket.disconnect(); // Disconnect socket
         dispatch({ type: 'SET_SOCKET', payload: null }); // Reset socket in state
-      }
+              }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.socket, dispatch]);

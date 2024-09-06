@@ -14,7 +14,7 @@ export const playerHandler = (
     player.isReady = true;
 
     // Notify all players in the room about the readiness status
-    io.to(roomID).emit('player-readiness-updated', rooms[roomID], playerName);
+    io.to(roomID).emit('player-readiness-updated', playerName);
 
     // Check if all players are ready
     const allReady = room.players.every((p) => p.isReady);
