@@ -7,7 +7,6 @@ import MultiGameEnd from './MultiGameEnd';
 import { Country, Data, PlayerScore } from '../types/appTypes';
 import { toastOptions } from '../utils/helpers';
 
-
 const answeredEffect = new Howl({
   src: [answeredMusic], // Replace with your sound file
 });
@@ -23,17 +22,13 @@ const MultiPlayerGameInterface = () => {
 
   // UseEffect to control TimeOut and TimerUpdated
   useEffect(() => {
-    console.log(state.gameInfo.currentQuestion);
     const socket = state.socket;
     // Listen for the 'timerUpdated' event
     socket?.on('timerUpdated', (time: number) => {
       setRemainingTime(time);
-      console.log('Timer from the server', time);
     });
     // Listen for the 'timeOut' event from the server
-    socket?.on('timerElapsed', () => {
-      console.log('Timer from the server has ended');
-    });
+    socket?.on('timerElapsed', () => {});
 
     // Cleanup function to remove the event listener
     return () => {
@@ -73,23 +68,18 @@ const MultiPlayerGameInterface = () => {
     const socket = state.socket;
 
     const handleAnswerCorrect = () => {
-      console.log('answer correct');
       toast.success('correct', toastOptions);
     };
 
     const handleScoreUpdated = (data: PlayerScore[]) => {
-      console.log('score updated', data);
-
       dispatch({ type: 'SET_PLAYERS', payload: data });
     };
 
     const handleAnswerIncorrect = () => {
-      console.log('answer incorrect');
       toast.error('incorrect', toastOptions);
     };
 
     const handleNextQuestion = (data: Data) => {
-      console.log('new question:', data);
       setIsDisabled(false);
       dispatch({ type: 'INCREMENT_QUESTION' });
       setCountryQuestion(data.country);

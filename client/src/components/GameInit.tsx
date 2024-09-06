@@ -25,7 +25,6 @@ const GameInit = () => {
   } else {
     serverUrl = import.meta.env.VITE_PROD_SERVER_URL;
   }
-  console.log(serverUrl);
   const connectSocket = (): Promise<Socket> => {
     return new Promise((resolve) => {
       if (!state.socket) {
@@ -35,10 +34,8 @@ const GameInit = () => {
         dispatch({ type: 'SET_SOCKET', payload: newSocket });
 
         newSocket.on('connect', () => {
-          console.log('Connected:', newSocket);
           resolve(newSocket);
         });
-
       } else {
         resolve(state.socket); // If the socket already exists, resolve immediately
       }
@@ -55,7 +52,6 @@ const GameInit = () => {
       payload: true,
     });
 
-    console.log(state.gameInfo.noOfPlayers);
     const socket = await connectSocket();
 
     if (socket) {
@@ -63,12 +59,10 @@ const GameInit = () => {
         type: 'SET_ROOM_ID',
         payload: roomID,
       });
-      console.log('from handleGameStart', socket);
       socket?.emit('create-game', roomID, state.gameInfo.noOfPlayers);
       socket?.on('gameCreated', (obj) => {
         toast.success('room created');
         // dispatch({type:'SET_NO_PLAYERS', payload:obj.room.noOfPlayers})
-        console.log(obj);
       });
     }
 
@@ -78,7 +72,6 @@ const GameInit = () => {
   async function handleGameJoin() {
     dispatch({ type: 'SET_ERROR', payload: null });
     dispatch({ type: 'SET_LOADING', payload: true });
-    console.log(state.gameInfo.noOfPlayers);
     const gameID = idRef.current?.value.trim();
 
     // this is to ensure i know who initiated the room on the client
@@ -98,7 +91,6 @@ const GameInit = () => {
       });
 
     if (socket && playerName) {
-      console.log('from handleGameJoin', socket);
       socket.emit('join-game', gameID, playerName);
       socket.on('joinedGame', (obj) => {
         if (!obj.success) {

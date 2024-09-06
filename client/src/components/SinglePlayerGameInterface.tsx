@@ -1,5 +1,9 @@
 import { useContext, useEffect, useState, useRef } from 'react';
-import { getRandomCountry, getRandomOptions, toastOptions } from '../utils/helpers';
+import {
+  getRandomCountry,
+  getRandomOptions,
+  toastOptions,
+} from '../utils/helpers';
 import { GlobalContext } from '../GlobalContext';
 import GameEnd from './GameEnd';
 import axios from 'axios';
@@ -17,8 +21,6 @@ const SinglePlayerGameInterface = () => {
 
   function getNextQuestion() {
     clearTimeout(timerRef.current);
-    console.log('next-question');
-    console.log('inside next question func', countries);
     let country: Country;
     let options: Country[];
     if (countries) {
@@ -35,13 +37,12 @@ const SinglePlayerGameInterface = () => {
     if (isTimeOut) {
       getNextQuestion();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTimeOut]);
 
   // Function to handle the timer
   const startTimer = () => {
     setIsTimeOut(false);
-    console.log('timer started');
     setRemainingTime(10); // Reset timer to 10 seconds
 
     const countdown = (time: number) => {
@@ -65,7 +66,6 @@ const SinglePlayerGameInterface = () => {
     setCountries(response.data);
   }
   useEffect(() => {
-    console.log('effect ran');
     fetchCountriesData();
     startTimer();
     return () => {
@@ -99,8 +99,6 @@ const SinglePlayerGameInterface = () => {
 
   function handleClick(name: string) {
     clearTimeout(timerRef.current);
-    console.log('from click option', name);
-    console.log('from correct random', questionCountry?.name.common);
     if (name === questionCountry?.name.common) {
       toast.success('correct', toastOptions);
       dispatch({ type: 'SET_SCORE' });
@@ -119,7 +117,12 @@ const SinglePlayerGameInterface = () => {
         <GameEnd />
       ) : (
         <div className='container flex flex-col items-center justify-center'>
-          <p className={`${remainingTime<6? 'text-red-600':'text-green-600'}`}>{remainingTime} seconds</p>
+          <p
+            className={`${
+              remainingTime < 6 ? 'text-red-600' : 'text-green-600'
+            }`}>
+            {remainingTime} seconds
+          </p>
           <div>
             <img
               src={questionCountry?.flags.svg}

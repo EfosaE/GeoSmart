@@ -37,7 +37,6 @@ const GameEnd = () => {
   const outcome = determineGameOutcome(state.gameInfo.players);
 
   useEffect(() => {
-    console.log(outcome.winner, state.playerName);
     if (outcome.winner?.name === state.playerName) {
       win.play();
     } else {

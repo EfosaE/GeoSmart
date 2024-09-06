@@ -10,7 +10,6 @@ const waitingMusic = new Howl({
   loop: true, // Set loop to true to play continuously
 });
 
-
 const Lobby = () => {
   const { state, dispatch } = useContext(GlobalContext);
 
@@ -22,9 +21,7 @@ const Lobby = () => {
     const soundTimeout = setTimeout(() => {
       waitingMusic.play(); // Play sound using Howler
     }, 2000);
-    console.log('RoomID from lobby', state.gameInfo.roomID);
     const handleCurrentRoomInfo = (data: Room) => {
-      console.log('Room', data);
       const playerData = data.players.map((player: Player) => ({
         name: player.name,
         score: player.score,
@@ -62,7 +59,6 @@ const Lobby = () => {
         toast.info(` ${playerName} just joined`);
       }
 
-      console.log('data', data);
       // Transformed data to only include name and score
       const filteredPlayers: PlayerScore[] = data.map(({ name, score }) => ({
         name,
@@ -84,7 +80,6 @@ const Lobby = () => {
   // #3
   useEffect(() => {
     const handlePlayerReadinessUpdated = (data: Room, playerName: string) => {
-      console.log(data);
       if (state.playerName !== playerName) {
         toast.info(` ${playerName} is ready`);
       }
