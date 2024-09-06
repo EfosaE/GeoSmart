@@ -18,7 +18,6 @@ export const playerHandler = (
 
     // Check if all players are ready
     const allReady = room.players.every((p) => p.isReady);
-    console.log(allReady);
     if (allReady) {
       io.to(roomID).emit('all-ready');
       socket.on('gameMounted', async () => {

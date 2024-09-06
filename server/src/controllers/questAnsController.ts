@@ -24,7 +24,6 @@ export async function getFirstQuestion(roomID: string) {
     });
     // store the correct answer in the room object
     rooms[roomID].correctAnswer = country.name.common;
-    console.log('correct answer', rooms[roomID].correctAnswer);
   } else {
     io.to(roomID).emit('startGame', {
       state: false,
@@ -65,12 +64,10 @@ export async function answerHandler(
   if (correctAnswer === answer) {
     // Increment the player's score for the correct answer
     player.score += 10;
-    console.log('players', rooms[roomID].players);
     socket.emit('answerCorrect');
     //  it throws if i send room[roomID]
     io.to(roomID).emit('scoreUpdated', rooms[roomID].players);
   } else {
-    console.log(rooms[roomID].players);
     socket.emit('answerIncorrect');
   }
 
@@ -80,24 +77,18 @@ export async function answerHandler(
   ) {
     rooms[roomID].answered = true;
     clearTimeout(rooms[roomID].questionTimer);
-    console.log('ANSWERED BY PLAYERS BEFORE TIMER');
     // this is supposed to print true
-    console.log(rooms[roomID].answered);
     getNextQuestion(roomID);
   }
-  console.log('remaining time from answerHandler', rooms[roomID].remainingTime!);
   if (rooms[roomID].remainingTime! <= 0) {
     rooms[roomID].answered = true;
     clearTimeout(rooms[roomID].questionTimer);
-    console.log('ANSWERED BY TIMER');
     getNextQuestion(roomID);
   }
 }
 
 // export function answeredByTimer(roomID: string) {
 //   rooms[roomID].answered = true;
-//   console.log('ANSWERED BY TIMER');
-//   console.log('answers after timer', rooms[roomID].answers);
-//   // Get new question
+//   //   //   // Get new question
 //   // getNextQuestion(roomID);
 // }

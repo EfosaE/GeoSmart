@@ -4,10 +4,7 @@ import http from 'http';
 import cors from 'cors';
 import { createRoom, endGame, joinRoom } from './controllers/gameController';
 import { playerHandler } from './controllers/playerController';
-import {
-  answerHandler,
-  getNextQuestion,
-} from './controllers/questAnsController';
+import { answerHandler } from './controllers/questAnsController';
 
 const app = express();
 // Configured CORS
@@ -62,8 +59,6 @@ export interface CustomSocket extends Socket {
 
 // Handle Socket.IO connections
 io.on('connection', (socket: CustomSocket) => {
-  console.log('A user connected:', socket.id);
-
   // Host creates a game room
   socket.on(
     'create-game',
@@ -74,18 +69,13 @@ io.on('connection', (socket: CustomSocket) => {
 
   // When user joins the game
   socket.on('join-game', (roomID, playerName) => {
-
     const room: Set<string> | undefined = io.sockets.adapter.rooms.get(roomID);
     // Check if the room exists and is not empty
     if (!room) {
       socket.emit('joinedGame', { success: false, message: 'Room not found' });
       return;
     }
-    
-    //  if (rooms[roomID].players) {
-    //    socket.emit('joinedGame', { success: false, message: 'Room not found' });
-    //    return;
-    //  }
+
     if (room) {
       joinRoom(socket, room, roomID, playerName);
     }
@@ -110,19 +100,14 @@ io.on('connection', (socket: CustomSocket) => {
 
   // remember to emit roomID
   socket.on('submit-answer', async (data, roomID: string) => {
-    console.log(data);
     const { playerName, answer, timestamp } = data;
     const correctAnswer = rooms[roomID].correctAnswer;
     const player = rooms[roomID].players.find((p) => p.name === playerName);
-
-    console.log(`player:${answer}, correct ans:${correctAnswer}`);
-    console.log(player);
 
     if (!rooms[roomID].answers) {
       rooms[roomID].answers = {};
     }
     rooms[roomID].answers[playerName] = answer;
-    console.log(rooms[roomID].answers);
     // refactor this into a check answer function
     const answersLength = Object.keys(rooms[roomID].answers).length;
     if (player)
@@ -142,10 +127,8 @@ io.on('connection', (socket: CustomSocket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('A user disconnected:', socket.id);
     if (socket.roomID)
       io.to(socket.roomID).emit('playerLeft', socket.playerName);
-    console.log(`${socket.playerName} disconnected from ${socket.roomID}`);
   });
 });
 
@@ -156,6 +139,4 @@ app.get('/', (req, res) => {
 });
 
 // Start the server and listen on the specified port
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+server.listen(port, () => {});

@@ -19,16 +19,11 @@ export function startCounter(roomID: string) {
       // this is crucial
       rooms[roomID].remainingTime = 0;
       io.to(roomID).emit('timerElapsed', roomID);
-      console.log('counter-cleared', rooms[roomID].answered);
       getNextQuestion(roomID);
       return;
     }
 
     rooms[roomID].remainingTime!--; // Decrement the value directly
-    console.log(
-      'remaining time in the counter...',
-      rooms[roomID].remainingTime
-    );
     io.to(roomID).emit('timerUpdated', rooms[roomID].remainingTime);
 
     rooms[roomID].questionTimer = setTimeout(updateTimer, 1000);
@@ -54,7 +49,6 @@ export const createRoom = (
     answered: false,
     players: [],
   };
-  console.log(rooms[roomID]);
   socket.roomID = roomID;
   socket.emit('gameCreated', { success: true, playerName }); // Send the room back to User1 or host
 };
@@ -65,10 +59,7 @@ export const joinRoom = (
   roomID: string,
   playerName: string
 ) => {
-  console.log(room);
-
   if (room && rooms[roomID].players.length < rooms[roomID].numberOfPlayers) {
-    console.log(`${playerName} joined roomID ${roomID}`);
     socket.join(roomID); // User joins the room
 
     // Add the user and room data to the socket instance
@@ -114,8 +105,6 @@ export function endGame(roomID: string) {
 
     // Clear any ongoing timer
     clearTimeout(rooms[roomID].questionTimer);
-    console.log('Game ended, counter cleared.');
-
     // Emit the game over event to all players in the room
     io.to(roomID).emit('gameOver', rooms[roomID]);
 
