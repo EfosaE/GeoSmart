@@ -8,11 +8,11 @@ const Dialog = forwardRef<HTMLDivElement, ModalProps>(
   ({ closeModal, isOpen }, ref) => {
     return (
       <div
-        className={`items-center justify-center h-screen absolute inset-0 z-50 w-full  ${
+        className={`items-center justify-center absolute inset-0 z-50 w-full  ${
           isOpen ? 'flex' : 'hidden'
         }`}
         ref={ref}>
-        <div className={`h-screen rounded-lg p-6 bg-white shadow-lg w-full`}>
+        <div className={`rounded-lg p-6 bg-white shadow-lg w-full`}>
           <div className='flex flex-col items-center justify-center '>
             <h2 className='text-blue-400 mb-4 text-md '>How to play!</h2>
             <div className='flex flex-col gap-4 font-light'>
