@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { GlobalContext } from '../GlobalContext';
 import { io, Socket } from 'socket.io-client';
 import { getRandomString } from '../utils/helpers';
@@ -25,54 +25,75 @@ const GameInit = () => {
   } else {
     serverUrl = import.meta.env.VITE_PROD_SERVER_URL;
   }
+
+  useEffect(() => {
+    console.log(state.socket);
+  }, [state.socket]);
+
   const connectSocket = (): Promise<Socket> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (!state.socket) {
         const newSocket = io(`${serverUrl}`, {
           transports: ['websocket', 'polling'],
         });
+
+        // Dispatch the new socket connection to your state
         dispatch({ type: 'SET_SOCKET', payload: newSocket });
 
+        // If the connection succeeds, resolve the promise
         newSocket.on('connect', () => {
           resolve(newSocket);
         });
+
+        // Handle connection errors and reject the promise
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        newSocket.on('connect_error', (err: any) => {
+          reject(new Error(`Connection failed: ${err.message}`));
+        });
       } else {
-        resolve(state.socket); // If the socket already exists, resolve immediately
+        // If the socket already exists, resolve immediately
+        resolve(state.socket);
       }
     });
   };
 
   async function handleGameStart() {
     setIsCreateLoading(true);
-    const roomID = getRandomString();
-    setCreatedRoom(roomID);
 
     dispatch({
       type: 'SET_HOST',
       payload: true,
     });
 
-    const socket = await connectSocket();
+    try {
+      const socket = await connectSocket();
+      console.log(socket);
+      if (socket.connected) {
+        const roomID = getRandomString();
+        setCreatedRoom(roomID);
+        dispatch({
+          type: 'SET_ROOM_ID',
+          payload: roomID,
+        });
+        socket?.emit('create-game', roomID, state.gameInfo.noOfPlayers);
+        socket?.on('gameCreated', (obj) => {
+          if (obj.success) {
+            toast.success('Room Created Successfully');
+          } else {
+            toast.error('An error occurred');
+          }
 
-    if (socket) {
-      dispatch({
-        type: 'SET_ROOM_ID',
-        payload: roomID,
-      });
-      socket?.emit('create-game', roomID, state.gameInfo.noOfPlayers);
-      socket?.on('gameCreated', (obj) => {
-        if (obj.success) {
-          toast.success('Room Created Successfully');
-        } else {
-          toast.error('An error occurred');
-        }
-
-        // for more than 2 players
-        // dispatch({type:'SET_NO_PLAYERS', payload:obj.room.noOfPlayers})
-      });
+          // for more than 2 players
+          // dispatch({type:'SET_NO_PLAYERS', payload:obj.room.noOfPlayers})
+        });
+      } else {
+        dispatch({ type: 'SET_SOCKET', payload: null });
+      }
+    } catch (error) {
+      if (error) toast.error('Connection failed');
+    } finally {
+      setIsCreateLoading(false);
     }
-
-    setIsCreateLoading(false);
   }
 
   async function handleGameJoin() {

@@ -17,7 +17,7 @@ app.use(
 );
 
 // Set the port number for the server
-const port = 4000;
+const port = process.env.PORT || 3000;
 
 // Create an HTTP server and attach it to the Express app
 const server = http.createServer(app);
@@ -139,4 +139,6 @@ app.get('/', (req, res) => {
 });
 
 // Start the server and listen on the specified port
-server.listen(port, () => {});
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
