@@ -90,7 +90,7 @@ const GameInit = () => {
         dispatch({ type: 'SET_SOCKET', payload: null });
       }
     } catch (error) {
-      if (error) toast.error('Connection failed');
+      if (error) toast.error('Connection failed, please try again');
     } finally {
       setIsCreateLoading(false);
     }
@@ -144,9 +144,7 @@ const GameInit = () => {
         <div className='container flex flex-col justify-center items-center gap-4'>
           <div className='flex flex-col justify-center gap-6'>
             <div>
-              <p className='text-violet-700 font-bold text-lg'>
-                Single Player:
-              </p>
+              <p className='text-violet-700 font-bold text-lg'></p>
               <button
                 className='rounded-md py-2 px-3 bg-indigo-600 text-white my-4'
                 onClick={() => {
@@ -219,6 +217,12 @@ const GameInit = () => {
                 </div>
               </div>
             </div>
+          </div>
+          <div className='w-fit overflow-hidden'>
+            <p className='text-blue-400 text-sm whitespace-nowrap animate-marquee'>
+              Note: I am using a free server instance so connection would take
+              time and may fail on first try.
+            </p>
           </div>
         </div>
       )}
