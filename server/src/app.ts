@@ -5,6 +5,7 @@ import cors from 'cors';
 import { createRoom, endGame, joinRoom } from './controllers/gameController';
 import { playerHandler } from './controllers/playerController';
 import { answerHandler } from './controllers/questAnsController';
+import { getCountries } from './country';
 
 const app = express();
 // Configured CORS
@@ -56,6 +57,7 @@ export interface CustomSocket extends Socket {
   playerName?: string; // You can define a more specific type if needed
   roomID?: string;
 }
+
 
 // Handle Socket.IO connections
 io.on('connection', (socket: CustomSocket) => {
@@ -130,15 +132,30 @@ io.on('connection', (socket: CustomSocket) => {
     if (socket.roomID)
       io.to(socket.roomID).emit('playerLeft', socket.playerName);
   });
+
+  socket.on('close', () => {
+    console.error('socket connection closed.');
+  });
+
+  socket.on('error', (error) => {
+    console.error('socket error:', error);
+  });
 });
 
 // Define a route for the root path ('/')
 app.get('/', (req, res) => {
+  // listen for the 'close' event on the request
+  req.on('close', () => {
+    console.log('closed connection');
+  });
+  if (res.socket) console.log(res.socket.destroyed); // true if socket is closed
   // Send a response to the client
   res.send('Hello from Efosa GeoSmart');
 });
 
 // Start the server and listen on the specified port
 server.listen(port, () => {
+ 
   console.log(`Server is running on port ${port}`);
+  
 });

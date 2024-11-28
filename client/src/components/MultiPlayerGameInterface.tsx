@@ -49,6 +49,7 @@ const MultiPlayerGameInterface = () => {
 
     // Event handler for 'gameInitialized'
     const handleGameInitialized = (data: Data) => {
+      console.log(data)
       setCountryQuestion(data.country);
       setOptions(data.options);
       dispatch({ type: 'SET_LOADING', payload: false });

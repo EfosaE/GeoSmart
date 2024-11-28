@@ -6,7 +6,6 @@ import {
 } from '../utils/helpers';
 import { GlobalContext } from '../GlobalContext';
 import GameEnd from './GameEnd';
-import axios from 'axios';
 import { Country } from '../types/appTypes';
 import { toast } from 'react-toastify';
 
@@ -61,9 +60,14 @@ const SinglePlayerGameInterface = () => {
   };
 
   async function fetchCountriesData() {
-    const response = await axios.get('https://restcountries.com/v3.1/all');
-
-    setCountries(response.data);
+    // const response = await axios.get('https://restcountries.com/v3.1/all');
+    fetch('https://restcountries.com/v3.1/all')
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setCountries(data);
+      })
+      .catch((error) => console.error('Fetch error:', error));
   }
   useEffect(() => {
     fetchCountriesData();

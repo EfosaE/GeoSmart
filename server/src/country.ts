@@ -1,4 +1,7 @@
-import axios from 'axios';
+import { readCompressedJsonFile } from './readCompFile';
+
+
+
 // Define the type of a country object based on the API response
 export interface Country {
   name: {
@@ -16,33 +19,17 @@ export interface Country {
 
 export let countries: Country[] = [];
 
-export const getCountries = async (retries = 3, delay = 1000) => {
+export const getCountries = async () => {
   if (countries.length > 0) {
     return countries; // Return cached countries if already fetched
   }
 
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await axios.get('https://restcountries.com/v3.1/all');
-      countries = response.data;
-      return countries;
-    } catch (error) {
-      if (i < retries - 1) {
-        console.warn(`Retrying (${i + 1}/${retries})...`);
-        await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
-      } else {
-        console.error('Error fetching countries:', error);
-        throw error; // Throw error after all retries fail
-      }
-    }
-  }
+  const countryData = await readCompressedJsonFile();
+  console.log(countryData);
+  countries = countryData;
+
 };
 
-
-// export const getRandomCountry = async (countries: Country[]) => {
-//   const randomIndex = Math.floor(Math.random() * countries.length);
-//   return countries[randomIndex];
-// };
 export const getRandomCountry = () => {
   if (countries.length === 0) {
     throw new Error('Countries data not loaded');

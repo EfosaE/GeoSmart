@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "concurrently \"npm run watch-ts\" \"nodemon dist/app.js\"",
     "watch-ts": "tsc -w",
-    "build": "tsc"
+    "build": "tsc",
+    "postbuild": "cp countries.json.gz dist/"
   },
   "keywords": [],
   "author": "",
@@ -19,9 +20,10 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "axios": "^1.7.7",
+    "axios": "^1.7.8",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "ts-node": "^10.9.2"
   }
 }
