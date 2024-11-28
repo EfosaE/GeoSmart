@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "concurrently \"npm run watch-ts\" \"nodemon dist/app.js\"",
     "watch-ts": "tsc -w",
-    "build": "tsc",
-    "postbuild": "cp countries.json.gz dist/"
+    "build": "tsc && cp countries.json.gz dist/"
   },
   "keywords": [],
   "author": "",
