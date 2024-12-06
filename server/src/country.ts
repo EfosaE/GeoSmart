@@ -1,4 +1,3 @@
-
 import { readCompressedJsonFile } from './readCompFile';
 
 // Define the type of a country object based on the API response
@@ -25,6 +24,12 @@ export const setCountries = async () => {
 
   const countryData = await readCompressedJsonFile();
   countries = countryData;
+};
+
+// Assuming getCountries returns a list of countries
+export const getCountries = async () => {
+  await setCountries();
+  return countries;
 };
 
 export const getRandomCountry = () => {
@@ -58,5 +63,3 @@ export function getRandomOptions(
   // Shuffle the options array
   return options.sort(() => Math.random() - 0.5);
 }
-
-

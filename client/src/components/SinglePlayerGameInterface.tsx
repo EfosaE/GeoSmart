@@ -63,13 +63,13 @@ const SinglePlayerGameInterface = () => {
 
   async function fetchCountriesData() {
     try {
-      const response = await axios.get('https://restcountries.com/v3.1/all');
-      setCountries(response.data);
-      console.log(response);
+      const response = await axios.get('https://geosmart.onrender.com/api/countries');
+      setCountries(response.data.countries);
+      console.log(response.data);
     } catch (error) {
       console.log(error);
       setError(
-        'Failed to get countries: https://restcountries.com/v3.1/all maybe down'
+        'Failed to get countries: https://geosmart.onrender.com/api/countries maybe down'
       );
     }
   }
