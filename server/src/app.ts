@@ -5,7 +5,7 @@ import cors from 'cors';
 import { createRoom, endGame, joinRoom } from './controllers/gameController';
 import { playerHandler } from './controllers/playerController';
 import { answerHandler } from './controllers/questAnsController';
-import { getCountries } from './country';
+
 
 const app = express();
 // Configured CORS
@@ -85,6 +85,7 @@ io.on('connection', (socket: CustomSocket) => {
 
   // listen for send player to lobby event
   socket.on('sendPlayerToLobby', (playerName, roomID) => {
+    console.log(playerName, roomID, rooms[roomID].players);
     // Send the current list of players to the newly joined user
     socket.on('lobbyMounted', () => {
       socket.emit('currentRoomInfo', rooms[roomID]);

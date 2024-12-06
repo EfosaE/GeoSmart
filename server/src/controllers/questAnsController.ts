@@ -1,13 +1,12 @@
 import { Socket } from 'socket.io';
 import { io, Player, rooms } from '../app';
-import { getCountries, getRandomCountry, getRandomOptions } from '../country';
+import { setCountries, getRandomCountry, getRandomOptions } from '../country';
 import { startCounter } from './gameController';
 
 export async function getQuestion(roomID: string) {
   rooms[roomID].answered = false;
-  const countries = await getCountries();
-  let country;
-  if (countries) country = getRandomCountry();
+  await setCountries()
+  const country = getRandomCountry();
   let options;
   if (country) options = getRandomOptions(country, 4);
   return { country, options };
@@ -17,7 +16,8 @@ export async function getFirstQuestion(roomID: string) {
   // Get new question
   const data = await getQuestion(roomID);
   const { country, options } = data;
-  if (country) {
+  console.log('compressed', country);
+  if (country != null) {
     io.to(roomID).emit('gameInitialized', {
       country,
       options,
@@ -25,10 +25,9 @@ export async function getFirstQuestion(roomID: string) {
     // store the correct answer in the room object
     rooms[roomID].correctAnswer = country.name.common;
   } else {
-    io.to(roomID).emit('startGame', {
-      state: false,
-      error: 'an error occurred',
-    });
+    console.log('error');
+    io.to(roomID).emit('error');
+    return
   }
   startCounter(roomID);
 }

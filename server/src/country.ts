@@ -1,6 +1,5 @@
+
 import { readCompressedJsonFile } from './readCompFile';
-
-
 
 // Define the type of a country object based on the API response
 export interface Country {
@@ -17,22 +16,20 @@ export interface Country {
   // Add other properties you're interested in
 }
 
-export let countries: Country[] = [];
+let countries: Country[] = [];
 
-export const getCountries = async () => {
+export const setCountries = async () => {
   if (countries.length > 0) {
     return countries; // Return cached countries if already fetched
   }
 
   const countryData = await readCompressedJsonFile();
-  console.log(countryData);
   countries = countryData;
-
 };
 
 export const getRandomCountry = () => {
   if (countries.length === 0) {
-    throw new Error('Countries data not loaded');
+    throw new Error('countries not initialized'); // Ensure the countries array is populated
   }
   const randomIndex = Math.floor(Math.random() * countries.length);
   return countries[randomIndex];
@@ -61,3 +58,5 @@ export function getRandomOptions(
   // Shuffle the options array
   return options.sort(() => Math.random() - 0.5);
 }
+
+

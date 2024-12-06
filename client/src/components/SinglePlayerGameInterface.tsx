@@ -8,10 +8,12 @@ import { GlobalContext } from '../GlobalContext';
 import GameEnd from './GameEnd';
 import { Country } from '../types/appTypes';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const SinglePlayerGameInterface = () => {
   const [questionCountry, setQuestionCountry] = useState<Country | null>(null);
   const [options, setOptions] = useState<Country[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { state, dispatch } = useContext(GlobalContext);
   const [countries, setCountries] = useState<Country[] | null>(null);
   const [isTimeOut, setIsTimeOut] = useState(false);
@@ -60,14 +62,16 @@ const SinglePlayerGameInterface = () => {
   };
 
   async function fetchCountriesData() {
-    // const response = await axios.get('https://restcountries.com/v3.1/all');
-    fetch('https://restcountries.com/v3.1/all')
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setCountries(data);
-      })
-      .catch((error) => console.error('Fetch error:', error));
+    try {
+      const response = await axios.get('https://restcountries.com/v3.1/all');
+      setCountries(response.data);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+      setError(
+        'Failed to get countries: https://restcountries.com/v3.1/all maybe down'
+      );
+    }
   }
   useEffect(() => {
     fetchCountriesData();
@@ -99,6 +103,10 @@ const SinglePlayerGameInterface = () => {
 
   if (!questionCountry || !countries) {
     return <div className=''>Getting Countries... </div>;
+  }
+
+  if (error) {
+    return <div className='text-red-400'>{error}</div>;
   }
 
   function handleClick(name: string) {

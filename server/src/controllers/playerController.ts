@@ -1,6 +1,5 @@
 import { Socket } from 'socket.io';
 import { io, Room, rooms } from '../app';
-import { getCountries, getRandomCountry, getRandomOptions } from '../country';
 import { getFirstQuestion, getQuestion } from './questAnsController';
 
 export const playerHandler = (

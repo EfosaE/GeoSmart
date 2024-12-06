@@ -15,7 +15,7 @@ const MultiPlayerGameInterface = () => {
   const [countryQuestion, setCountryQuestion] = useState<Country | null>(null);
   const [options, setOptions] = useState<Country[] | null>(null);
   const [isDisabled, setIsDisabled] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
   const [remainingTime, setRemainingTime] = useState<number | undefined>();
 
   const { state, dispatch } = useContext(GlobalContext);
@@ -29,13 +29,21 @@ const MultiPlayerGameInterface = () => {
     });
     // Listen for the 'timeOut' event from the server
     socket?.on('timerElapsed', () => {});
+    function handleError() {
+      setError('An error has occurred... refresh the page!');
+      // Set loading state to true
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
 
+    socket?.on('error', handleError);
+ 
     // Cleanup function to remove the event listener
     return () => {
       socket?.off('timerOut'); // Remove the 'timeOut' event listener
       socket?.off('timerUpdated');
+      socket?.off('error');
     };
-  }, [state.socket, state.gameInfo.currentQuestion]);
+  }, [state.socket, state.gameInfo.currentQuestion, dispatch]);
 
   // #1
   useEffect(() => {
@@ -49,7 +57,7 @@ const MultiPlayerGameInterface = () => {
 
     // Event handler for 'gameInitialized'
     const handleGameInitialized = (data: Data) => {
-      console.log(data)
+      console.log(data);
       setCountryQuestion(data.country);
       setOptions(data.options);
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -122,6 +130,14 @@ const MultiPlayerGameInterface = () => {
     return (
       <p className='container flex items-center justify-center'>
         Loading Game Data...
+      </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className='container flex items-center justify-center text-red-400'>
+        {error}
       </p>
     );
   }
