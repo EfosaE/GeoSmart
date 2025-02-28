@@ -16,7 +16,7 @@ export const readCompressedJsonFile = (): Promise<any> => {
     stream.on('end', () => {
       try {
         const data = JSON.parse(json); // Parse decompressed JSON
-        console.log(data)
+        // console.log(data)
         resolve(data); // Resolve the Promise with the parsed data
       } catch (error ) {
         reject(new Error('Error parsing JSON: ' + error));

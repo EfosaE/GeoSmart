@@ -23,6 +23,7 @@ export const setCountries = async () => {
   }
 
   const countryData = await readCompressedJsonFile();
+  console.log("Country Data Read Successfully!")
   countries = countryData;
 };
 
