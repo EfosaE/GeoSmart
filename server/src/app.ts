@@ -11,7 +11,7 @@ const app = express();
 // Configured CORS
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://geosmart-app.netlify.app/'],
+    origin: ['http://localhost:5173', 'https://geosmart-app.netlify.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // If you need to send cookies with the requests
   })
