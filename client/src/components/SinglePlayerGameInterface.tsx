@@ -66,7 +66,6 @@ const SinglePlayerGameInterface = () => {
       // 
       const response = await axios.get("https://geosmart.onrender.com/api/countries");
       setCountries(response.data.countries);
-      console.log(response);
       console.log(response.data);
     } catch (error) {
       console.log(error);
