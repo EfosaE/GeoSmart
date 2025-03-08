@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "main": "app.js",
   "scripts": {
-    "dev": "concurrently \"npm run watch-ts\" \"nodemon dist/app.js\"",
+    "dev": "concurrently \"npm run watch-ts\" \"node dist/app.js\"",
     "watch-ts": "tsc -w",
     "build": "tsc && cp ./src/countries.json.gz ./dist/"
   },

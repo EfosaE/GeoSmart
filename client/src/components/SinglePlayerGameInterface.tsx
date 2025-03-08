@@ -1,14 +1,14 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef } from "react";
 import {
   getRandomCountry,
   getRandomOptions,
   toastOptions,
-} from '../utils/helpers';
-import { GlobalContext } from '../GlobalContext';
-import GameEnd from './GameEnd';
-import { Country } from '../types/appTypes';
-import { toast } from 'react-toastify';
-import axios from 'axios';
+} from "../utils/helpers";
+import { GlobalContext } from "../GlobalContext";
+import GameEnd from "./GameEnd";
+import { Country } from "../types/appTypes";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const SinglePlayerGameInterface = () => {
   const [questionCountry, setQuestionCountry] = useState<Country | null>(null);
@@ -30,7 +30,7 @@ const SinglePlayerGameInterface = () => {
       setQuestionCountry(country);
       setOptions(options);
     }
-    dispatch({ type: 'INCREMENT_QUESTION' });
+    dispatch({ type: "INCREMENT_QUESTION" });
     startTimer();
   }
 
@@ -63,30 +63,31 @@ const SinglePlayerGameInterface = () => {
 
   async function fetchCountriesData() {
     try {
-      const response = await axios.get('https://geosmart.onrender.com/api/countries');
+      // https://geosmart.onrender.com/api/countries
+      const response = await axios.get("http://localhost:3000/api/countries");
       setCountries(response.data.countries);
+      console.log(response);
       console.log(response.data);
     } catch (error) {
       console.log(error);
-      setError(
-        'Failed to get countries: https://geosmart.onrender.com/api/countries maybe down'
-      );
+      setError("Failed to get countries: Please try again later");
     }
   }
   useEffect(() => {
     fetchCountriesData();
-    startTimer();
+  }, []);
+
+  useEffect(() => {
+
+    if (countries) {
+      setQuestionCountry(getRandomCountry(countries));
+      startTimer();
+    }
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current); // Cleanup the timer when the component unmounts
       }
     };
-  }, []);
-
-  useEffect(() => {
-    if (countries) {
-      setQuestionCountry(getRandomCountry(countries));
-    }
   }, [countries]);
 
   useEffect(() => {
@@ -97,25 +98,28 @@ const SinglePlayerGameInterface = () => {
 
   useEffect(() => {
     if (state.gameInfo.currentQuestion > state.gameInfo.totalQuestions) {
-      dispatch({ type: 'SET_GAME_OVER', payload: true });
+      dispatch({ type: "SET_GAME_OVER", payload: true });
     }
   }, [state.gameInfo.currentQuestion, state.gameInfo.totalQuestions, dispatch]);
+  useEffect(() => {
+   console.log('an error occurred', error)
+  }, [error]);
 
-  if (!questionCountry || !countries) {
-    return <div className=''>Getting Countries... </div>;
+  if ((!questionCountry || !countries) && !error) {
+    return <div className="">Getting Countries... </div>;
   }
 
   if (error) {
-    return <div className='text-red-400'>{error}</div>;
+    return <div className="text-red-400">{error}</div>;
   }
 
   function handleClick(name: string) {
     clearTimeout(timerRef.current);
     if (name === questionCountry?.name.common) {
-      toast.success('correct', toastOptions);
-      dispatch({ type: 'SET_SCORE' });
+      toast.success("correct", toastOptions);
+      dispatch({ type: "SET_SCORE" });
     } else {
-      toast.error('Incorrect', toastOptions);
+      toast.error("Incorrect", toastOptions);
     }
 
     getNextQuestion();
@@ -127,27 +131,31 @@ const SinglePlayerGameInterface = () => {
     <div>
       {state.gameInfo.isGameOver ? (
         <GameEnd />
+      ) : error ? (
+        error
       ) : (
-        <div className='container flex flex-col items-center justify-center'>
+        <div className="container flex flex-col items-center justify-center">
           <p
             className={`${
-              remainingTime < 6 ? 'text-red-600' : 'text-green-600'
-            }`}>
+              remainingTime < 6 ? "text-red-600" : "text-green-600"
+            }`}
+          >
             {remainingTime} seconds
           </p>
           <div>
             <img
               src={questionCountry?.flags.svg}
               alt={questionCountry?.flags.alt}
-              className='size-40 m-2'
+              className="size-40 m-2"
             />
           </div>
-          <div className='flex flex-col gap-2'>
+          <div className="flex flex-col gap-2">
             {options?.map((country, index) => (
               <button
                 key={index}
-                className='w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF]'
-                onClick={() => handleClick(country.name.common)}>
+                className="w-64 py-2 rounded text-[#6D31EDFF] bg-[#F5F1FEFF]"
+                onClick={() => handleClick(country.name.common)}
+              >
                 {country.name.common}
               </button>
             ))}
